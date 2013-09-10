@@ -31,6 +31,7 @@ namespace YAF.Controls
     using YAF.Types.Extensions;
     using YAF.Types.Interfaces;
     using YAF.Utils;
+    using YAF.Utils.Helpers;
 
     #endregion
 
@@ -81,7 +82,7 @@ namespace YAF.Controls
         {
             get
             {
-                return this.ViewState["Count"] != null ? (int)this.ViewState["Count"] : 0;
+                return this.ViewState["Count"] != null ? this.ViewState["Count"].ToType<int>() : 0;
             }
 
             set
@@ -129,7 +130,7 @@ namespace YAF.Controls
         {
             get
             {
-                return this.ViewState["PageSize"] != null ? (int)this.ViewState["PageSize"] : 20;
+                return this.ViewState["PageSize"] != null ? this.ViewState["PageSize"].ToType<int>() : 20;
             }
 
             set
@@ -162,19 +163,19 @@ namespace YAF.Controls
         {
             get
             {
-                if (this.LinkedPager != null)
+                if (this.LinkedPager == null)
                 {
-                    var linkedPager = (Pager)this.Parent.FindControl(this.LinkedPager);
-
-                    if (linkedPager == null)
-                    {
-                        throw new Exception("Failed to link pager to '{0}'.".FormatWith(this.LinkedPager));
-                    }
-
-                    return linkedPager;
+                    return null;
                 }
 
-                return null;
+                var linkedPager = this.Parent.FindControlAs<Pager>(this.LinkedPager);
+
+                if (linkedPager == null)
+                {
+                    throw new Exception("Failed to link pager to '{0}'.".FormatWith(this.LinkedPager));
+                }
+
+                return linkedPager;
             }
         }
 
@@ -251,6 +252,7 @@ namespace YAF.Controls
             if (page > 1)
             {
                 string tmp = parser.CreateQueryString(new[] { "g", "p", "tabid", "find" });
+
                 if (tmp.Length > 0)
                 {
                     tmp += "&";
@@ -269,11 +271,9 @@ namespace YAF.Controls
         }
 
         /// <summary>
-        /// The on init.
+        /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
-        /// <param name="e">
-        /// The e.
-        /// </param>
+        /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnInit([NotNull] EventArgs e)
         {
             base.OnInit(e);
@@ -282,8 +282,8 @@ namespace YAF.Controls
             {
                 // set a new page...
                 this.CurrentPageIndex =
-                    (int)Security.StringToLongOrRedirect(this.Get<HttpRequestBase>().QueryString.GetFirstOrDefault("p")) -
-                    1;
+                    Security.StringToLongOrRedirect(this.Get<HttpRequestBase>().QueryString.GetFirstOrDefault("p"))
+                        .ToType<int>() - 1;
             }
 
             this._pageLabel.ID = this.GetExtendedID("PageLabel");
@@ -297,11 +297,9 @@ namespace YAF.Controls
         }
 
         /// <summary>
-        /// The on load.
+        /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
-        /// <param name="e">
-        /// The e.
-        /// </param>
+        /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad([NotNull] EventArgs e)
         {
             base.OnLoad(e);
@@ -388,7 +386,7 @@ gotoForm.fadeIn( 'slow', function() {{
                         : "Go to page...",
                     this.ClientID));
 
-            this._pageLabel.CssClass = "pagecount";
+            this._pageLabel.CssClass = "pagecount btn btn-default";
 
             // have to be careful about localization because the pager is used in the admin pages...
             string pagesText = "Pages";
@@ -402,9 +400,9 @@ gotoForm.fadeIn( 'slow', function() {{
             // render this control...
             this._pageLabel.RenderControl(output);
 
-            this.OutputLinks(output, this.UsePostBack);
-
             this._gotoPageForm.RenderControl(output);
+
+            this.OutputLinks(output, this.UsePostBack);
 
             output.WriteLine("</div>");
 
@@ -414,29 +412,29 @@ gotoForm.fadeIn( 'slow', function() {{
         /// <summary>
         /// Gets the link URL.
         /// </summary>
-        /// <param name="pageNum">The page num.</param>
+        /// <param name="pageNumber">The page number.</param>
         /// <param name="postBack">The post back.</param>
         /// <returns>
         /// The get link url.
         /// </returns>
-        private string GetLinkUrl(int pageNum, bool postBack)
+        private string GetLinkUrl(int pageNumber, bool postBack)
         {
             return postBack
-                       ? this.Page.ClientScript.GetPostBackClientHyperlink(this, pageNum.ToString())
-                       : this.GetPageURL(pageNum);
+                       ? this.Page.ClientScript.GetPostBackClientHyperlink(this, pageNumber.ToString())
+                       : this.GetPageURL(pageNumber);
         }
 
         /// <summary>
-        /// The output links.
+        /// Outputs the links.
         /// </summary>
-        /// <param name="output">
-        /// The output.
-        /// </param>
-        /// <param name="postBack">
-        /// The post back.
-        /// </param>
+        /// <param name="output">The output.</param>
+        /// <param name="postBack">The post back.</param>
         private void OutputLinks([NotNull] HtmlTextWriter output, bool postBack)
         {
+            output.WriteBeginTag("ul");
+            output.WriteAttribute("class", "pagination");
+            output.Write(HtmlTextWriter.TagRightChar);
+
             int iStart = this.CurrentPageIndex - 2;
             int iEnd = this.CurrentPageIndex + 3;
             if (iStart < 0)
@@ -451,70 +449,75 @@ gotoForm.fadeIn( 'slow', function() {{
 
             if (iStart > 0)
             {
+                output.WriteBeginTag("li");
+                output.Write(HtmlTextWriter.TagRightChar);
+
                 output.RenderAnchorBegin(
                     this.GetLinkUrl(1, postBack), "pagelinkfirst", this.GetText("COMMON", "GOTOFIRSTPAGE_TT"));
 
-                output.WriteBeginTag("span");
-                output.Write(HtmlTextWriter.TagRightChar);
-
                 output.Write("&laquo;");
-                output.WriteEndTag("span");
                 output.WriteEndTag("a");
+
+                output.WriteEndTag("li");
             }
 
             if (this.CurrentPageIndex > iStart)
             {
+                output.WriteBeginTag("li");
+                output.Write(HtmlTextWriter.TagRightChar);
+
                 output.RenderAnchorBegin(
                     this.GetLinkUrl(this.CurrentPageIndex, postBack),
                     "pagelink",
                     this.GetText("COMMON", "GOTOPREVPAGE_TT"));
 
-                output.WriteBeginTag("span");
-                output.Write(HtmlTextWriter.TagRightChar);
-
                 output.Write("&lt;");
-                output.WriteEndTag("span");
                 output.WriteEndTag("a");
+
+                output.WriteEndTag("li");
             }
 
             for (int i = iStart; i < iEnd; i++)
             {
+                var page = (i + 1).ToString();
+
                 if (i == this.CurrentPageIndex)
                 {
-                    output.WriteBeginTag("span");
-                    output.WriteAttribute("class", "pagecurrent");
+                    output.WriteBeginTag("li");
+                    output.WriteAttribute("class", "active");
                     output.Write(HtmlTextWriter.TagRightChar);
-                    output.Write(i + 1);
-                    output.WriteEndTag("span");
+
+                    output.RenderAnchorBegin("#", "pagecurrent", this.GetText("COMMON", page));
+                    output.Write(page);
+                    output.WriteEndTag("a");
+                    output.WriteEndTag("li");
                 }
                 else
                 {
-                    string page = (i + 1).ToString();
+                    output.WriteBeginTag("li");
+                output.Write(HtmlTextWriter.TagRightChar);
 
                     output.RenderAnchorBegin(this.GetLinkUrl(i + 1, postBack), "pagelink", page);
 
-                    output.WriteBeginTag("span");
-                    output.Write(HtmlTextWriter.TagRightChar);
-
                     output.Write(page);
-                    output.WriteEndTag("span");
                     output.WriteEndTag("a");
+                    output.WriteEndTag("li");
                 }
             }
 
             if (this.CurrentPageIndex < (this.PageCount() - 1))
             {
+                output.WriteBeginTag("li");
+                output.Write(HtmlTextWriter.TagRightChar);
+
                 output.RenderAnchorBegin(
                     this.GetLinkUrl(this.CurrentPageIndex + 2, postBack),
                     "pagelink",
                     this.GetText("COMMON", "GOTONEXTPAGE_TT"));
 
-                output.WriteBeginTag("span");
-                output.Write(HtmlTextWriter.TagRightChar);
-
                 output.Write("&gt;");
-                output.WriteEndTag("span");
                 output.WriteEndTag("a");
+                output.WriteEndTag("li");
             }
 
             if (iEnd >= this.PageCount())
@@ -522,15 +525,17 @@ gotoForm.fadeIn( 'slow', function() {{
                 return;
             }
 
+            output.WriteBeginTag("li");
+                output.Write(HtmlTextWriter.TagRightChar);
+
             output.RenderAnchorBegin(
                 this.GetLinkUrl(this.PageCount(), postBack), "pagelinklast", this.GetText("COMMON", "GOTOLASTPAGE_TT"));
 
-            output.WriteBeginTag("span");
-            output.Write(HtmlTextWriter.TagRightChar);
-
             output.Write("&raquo;");
-            output.WriteEndTag("span");
             output.WriteEndTag("a");
+            output.WriteEndTag("li");
+
+            output.WriteEndTag("ul");
         }
 
         /// <summary>

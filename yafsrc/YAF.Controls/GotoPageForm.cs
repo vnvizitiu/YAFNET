@@ -156,7 +156,7 @@ namespace YAF.Controls
         }
 
         /// <summary>
-        ///     Gets InnerDiv.
+        ///     Gets Inner DIV.
         /// </summary>
         public HtmlGenericControl InnerDiv
         {
@@ -208,6 +208,7 @@ namespace YAF.Controls
             this._mainPanel.Controls.Add(this._divInner);
 
             this._gotoButton.ID = this.GetExtendedID("GotoButton");
+            this._gotoButton.CssClass = "btn btn-primary";
             this._gotoButton.Style.Add(HtmlTextWriterStyle.Width, "70px");
             this._gotoButton.CausesValidation = false;
             this._gotoButton.UseSubmitBehavior = false;
@@ -220,13 +221,14 @@ namespace YAF.Controls
             this._divInner.Controls.Add(this._gotoTextBox);
             this._divInner.Controls.Add(this._gotoButton);
 
-            var replaceItems = new Dictionary<string, string>()
+            var replaceItems = new Dictionary<string, string>
                                {
                                    { "TEXTBOXID", this._gotoTextBox.ClientID },
                                    { "BUTTONID", this._gotoButton.ClientID }
                                };
 
-            var script = replaceItems.Aggregate(@"(function(app, $){
+            var script = replaceItems.Aggregate(
+                @"(function(app, $){
                 app.add_load(function() {
                     $('#TEXTBOXID').bind('keydown', function(e) {        
                         if (e.keyCode == 13) { 
@@ -235,7 +237,8 @@ namespace YAF.Controls
                         } 
                     });
                 });
-                })(Sys.Application, jQuery);", (current, replaceItem) => current.Replace(replaceItem.Key, replaceItem.Value));
+                })(Sys.Application, jQuery);",
+                (current, replaceItem) => current.Replace(replaceItem.Key, replaceItem.Value));
 
             this.PageContext.PageElements.RegisterJsBlockStartup(@"GotoPageFormKeyUp_{0}".FormatWith(this.ClientID), script);
         }
@@ -266,11 +269,9 @@ namespace YAF.Controls
         }
 
         /// <summary>
-        ///     The on init.
+        /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
-        /// <param name="e">
-        ///     The e.
-        /// </param>
+        /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnInit([NotNull] EventArgs e)
         {
             base.OnInit(e);
