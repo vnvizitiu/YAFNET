@@ -1,7 +1,7 @@
 /* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  * 
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -206,11 +206,20 @@ namespace YAF.Controls
 
             if (row["ReadAccess"].ToType<int>() > 0)
             {
-                output =
-                    "<a href=\"{0}\" title=\"{1}\">{2}</a>".FormatWith(
+                if (row["RemoteURL"] != DBNull.Value)
+                {
+                    output = "<a href=\"{0}\" title=\"{1}\" target=\"_blank\">{2}</a>".FormatWith(
+                        (string)row["RemoteURL"],
+                        this.GetText("COMMON", "VIEW_FORUM"),
+                        this.Page.HtmlEncode(output));
+                }
+                else
+                {
+                    output = "<a href=\"{0}\" title=\"{1}\">{2}</a>".FormatWith(
                         YafBuildLink.GetLink(ForumPages.topics, "f={0}&name={1}", forumID, output),
                         this.GetText("COMMON", "VIEW_FORUM"),
                         this.Page.HtmlEncode(output));
+                }
             }
             else
             {

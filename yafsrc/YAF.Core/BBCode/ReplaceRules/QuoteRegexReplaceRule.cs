@@ -1,7 +1,7 @@
 /* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  * 
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -97,8 +97,8 @@ namespace YAF.Core.BBCode.ReplaceRules
 
                     try
                     {
-                        postId = quote.Substring(quote.IndexOf(";") + 1);
-                        userName = quote = quote.Remove(quote.IndexOf(";"));
+                        postId = quote.Substring(quote.LastIndexOf(";") + 1);
+                        userName = quote = quote.Remove(quote.LastIndexOf(";"));
                     }
                     catch (Exception)
                     {

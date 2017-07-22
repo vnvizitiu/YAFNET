@@ -1,7 +1,7 @@
 /* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  * 
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -311,7 +311,7 @@ namespace YAF
                     }
                     catch (Exception ex)
                     {
-                        YafContext.Current.Get<ILogger>().Error(ex, "Error while trying to connect the facebook user");
+                        YafContext.Current.Get<ILogger>().Error(ex, "Error while trying to connect the google user");
 
                         message = ex.Message;
                     }
@@ -341,7 +341,7 @@ namespace YAF
                     catch (Exception ex)
                     {
                         YafContext.Current.Get<ILogger>()
-                            .Error(ex, "Error while trying to login or register the facebook user");
+                            .Error(ex, "Error while trying to login or register the google user");
 
                         message = ex.Message;
                     }

@@ -1,7 +1,7 @@
 ﻿/* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -1630,7 +1630,7 @@ namespace YAF.Pages
             // post message...
             long messageId = 0;
             object replyTo = -1;
-            string msg = this._quickReplyEditor.Text;
+            var message = this._quickReplyEditor.Text;
             long topicID = this.PageContext.PageTopicID;
 
             // SPAM Check
@@ -1815,7 +1815,7 @@ namespace YAF.Pages
                 spamApproved = true;
             }
 
-            var tFlags = new MessageFlags
+            var messageFlags = new MessageFlags
                 {
                     IsHtml = this._quickReplyEditor.UsesHTML,
                     IsBBCode = this._quickReplyEditor.UsesBBCode,
@@ -1827,12 +1827,12 @@ namespace YAF.Pages
                 !LegacyDb.message_save(
                     topicID,
                     this.PageContext.PageUserID,
-                    msg,
+                    message,
                     null,
                     this.Get<HttpRequestBase>().GetUserRealIPAddress(),
                     null,
                     replyTo,
-                    tFlags.BitValue,
+                    messageFlags.BitValue,
                     ref messageId))
             {
                 topicID = 0;
@@ -1873,7 +1873,7 @@ namespace YAF.Pages
                                this.PageContext.PageTopicID,
                                messageId.ToType<int>(),
                                this.PageContext.PageTopicName,
-                               msg);
+                               message);
                 }
 
                 // redirect to newly posted message

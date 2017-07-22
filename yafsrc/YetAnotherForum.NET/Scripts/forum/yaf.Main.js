@@ -1,11 +1,20 @@
 // Generic Functions
 jQuery(document).ready(function () {
     // Numeric Spinner Inputs
-    jQuery("input[type='number']").TouchSpin();
+    jQuery("input[type='number']").TouchSpin({
+        max: 2147483647
+    });
 
-    jQuery(".serverTime-Input").TouchSpin({ min: -720, max: 720 });
+    jQuery(".serverTime-Input").TouchSpin({
+        min: -720,
+        max: 720
+    });
 
-    jQuery(".yafnet-bs .standardSelectMenu").select2({ theme: "bootstrap", dropdownAutoWidth: true, width: 'style' });
+    jQuery(".yafnet-bs .standardSelectMenu").select2({
+        theme: "bootstrap",
+        dropdownAutoWidth: true,
+        width: 'style'
+    });
 
     jQuery(".yafnet-bs .selectpicker").select2({
         theme: "bootstrap",
@@ -21,17 +30,13 @@ jQuery(document).ready(function () {
     /// Convert user posted image to modal images
     /// </summary>
     /// <returns></returns>
-    jQuery(".postContainer .UserPostedImage,.postContainer_Alt .UserPostedImage").each(function() {
+    jQuery(".postContainer .UserPostedImage,.postContainer_Alt .UserPostedImage, .previewPostContent .UserPostedImage").each(function () {
         var image = jQuery(this);
 
         if (!image.parents('a').length) {
-            image.wrap('<a href="' + image.attr("src") + '" date-img="' + image.attr("src") + '" title="' + image.attr("alt") + '"/>');
+            image.wrap('<a href="' + image.attr("src") + '" title="' + image.attr("alt") + '" data-gallery />');
         }
     });
-
-    jQuery('.postdiv div').has('.attachedImage').addClass('ceebox');
-
-    jQuery('.postdiv div').has('.UserPostedImage').addClass('ceebox');
 
     // Show caps lock info on password fields
     jQuery("input[type='password']").keypress(function (e) {

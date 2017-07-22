@@ -1,7 +1,7 @@
 ﻿/* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -65,7 +65,7 @@ namespace YAF.Core.Services.Auth
             var redirectUrl = GetRedirectURL(request);
 
             return
-                "https://graph.facebook.com/oauth/authorize?client_id={0}&redirect_uri={1}{2}&scope={3}".FormatWith(
+                "https://graph.facebook.com/v2.9/oauth/authorize?client_id={0}&redirect_uri={1}{2}&scope={3}".FormatWith(
                     Config.FacebookAPIKey,
                     redirectUrl,
                     redirectUrl.Contains("connectCurrent") ? "&state=connectCurrent" : string.Empty,
@@ -87,7 +87,7 @@ namespace YAF.Core.Services.Auth
         public string GetAccessToken(string authorizationCode, HttpRequest request)
         {
             var urlGetAccessToken =
-                "https://graph.facebook.com/oauth/access_token?client_id={0}&client_secret={1}&redirect_uri={2}&code={3}"
+                "https://graph.facebook.com/v2.9/oauth/access_token?client_id={0}&client_secret={1}&redirect_uri={2}&code={3}"
                     .FormatWith(
                         Config.FacebookAPIKey,
                         Config.FacebookSecretKey,
@@ -101,9 +101,7 @@ namespace YAF.Core.Services.Auth
                 return string.Empty;
             }
 
-            var queryStringCollection = HttpUtility.ParseQueryString(responseData);
-
-            return queryStringCollection["access_token"] ?? string.Empty;
+            return responseData.FromJson<FacebookAccessToken>().AccessToken ?? string.Empty;
         }
 
         #region Get Current Facebook User Profile
@@ -482,6 +480,9 @@ namespace YAF.Core.Services.Auth
             // create empty profile just so they have one
             var userProfile = YafUserProfile.GetProfile(facebookUser.UserName);
 
+            // setup their initial profile information
+            userProfile.Save();
+
             userProfile.Facebook = facebookUser.ProfileURL;
             userProfile.FacebookId = facebookUser.UserID;
             userProfile.Homepage = facebookUser.ProfileURL;
@@ -556,7 +557,7 @@ namespace YAF.Core.Services.Auth
                 null);
 
             var autoWatchTopicsEnabled = YafContext.Current.Get<YafBoardSettings>().DefaultNotificationSetting
-                                          == UserNotificationSetting.TopicsIPostToOrSubscribeTo;
+                                         == UserNotificationSetting.TopicsIPostToOrSubscribeTo;
 
             // save the settings...
             LegacyDb.user_savenotification(

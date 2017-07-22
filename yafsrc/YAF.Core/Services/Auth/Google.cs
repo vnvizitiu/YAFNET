@@ -1,7 +1,7 @@
 /* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -430,15 +430,15 @@ namespace YAF.Core.Services.Auth
             // create empty profile just so they have one
             var userProfile = YafUserProfile.GetProfile(googleUser.UserName);
 
+            // setup their initial profile information
+            userProfile.Save();
+
             userProfile.Google = googleUser.ProfileURL;
             userProfile.GoogleId = googleUser.UserID;
             userProfile.Homepage = googleUser.ProfileURL;
 
             userProfile.Gender = userGender;
 
-            userProfile.Save();
-
-            // setup their initial profile information
             userProfile.Save();
 
             if (userID == null)
@@ -466,6 +466,9 @@ namespace YAF.Core.Services.Auth
             // save the time zone...
             var userId = UserMembershipHelper.GetUserIDFromProviderUserKey(user.ProviderUserKey);
 
+            var autoWatchTopicsEnabled = YafContext.Current.Get<YafBoardSettings>().DefaultNotificationSetting
+                                         == UserNotificationSetting.TopicsIPostToOrSubscribeTo;
+
             LegacyDb.user_save(
                 userId,
                 YafContext.Current.PageBoardID,
@@ -479,14 +482,11 @@ namespace YAF.Core.Services.Auth
                 null,
                 null,
                 null,
-                null,
-                null,
+                YafContext.Current.Get<YafBoardSettings>().DefaultNotificationSetting,
+                autoWatchTopicsEnabled,
                 null,
                 null,
                 null);
-
-            var autoWatchTopicsEnabled = YafContext.Current.Get<YafBoardSettings>().DefaultNotificationSetting
-                                          == UserNotificationSetting.TopicsIPostToOrSubscribeTo;
 
             // save the settings...
             LegacyDb.user_savenotification(

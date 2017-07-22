@@ -1,7 +1,7 @@
 /* Yet Another Forum.NET
  * Copyright (C) 2003-2005 Bjørnar Henden
  * Copyright (C) 2006-2013 Jaben Cargman
- * Copyright (C) 2014-2016 Ingo Herbote
+ * Copyright (C) 2014-2017 Ingo Herbote
  * http://www.yetanotherforum.net/
  * 
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -470,6 +470,9 @@ namespace YAF.Pages.Admin
                 int.TryParse((string)row["Timezone"], out timeZone);
             }
 
+            var autoWatchTopicsEnabled = this.Get<YafBoardSettings>().DefaultNotificationSetting
+                                         == UserNotificationSetting.TopicsIPostToOrSubscribeTo;
+
             LegacyDb.user_save(
                 userId,
                 YafContext.Current.PageBoardID,
@@ -483,14 +486,11 @@ namespace YAF.Pages.Admin
                 row.Table.Columns.Contains("TextEditor") ? row["TextEditor"] : null,
                 null,
                 null,
-                null,
-                null,
+                this.Get<YafBoardSettings>().DefaultNotificationSetting,
+                autoWatchTopicsEnabled,
                 isDST,
                 null,
                 null);
-
-            var autoWatchTopicsEnabled = this.Get<YafBoardSettings>().DefaultNotificationSetting
-                                          == UserNotificationSetting.TopicsIPostToOrSubscribeTo;
 
             // save the settings...
             LegacyDb.user_savenotification(
